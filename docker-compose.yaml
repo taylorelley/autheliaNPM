@@ -1,0 +1,49 @@
+---
+version: "3.8"
+
+networks:
+  net:
+    driver: bridge
+
+services:
+  nginx:
+    container_name: nginx
+    image: jc21/nginx-proxy-manager
+    restart: unless-stopped
+    networks:
+      net:
+        aliases: []
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ${PWD}/data/nginx-proxy-manager/data:/data
+      - ${PWD}/data/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+      - ${PWD}/data/nginx/snippets:/config/nginx/snippets:ro
+    environment:
+      TZ: 'Pacific/Auckland'
+  authelia:
+    container_name: authelia
+    image: authelia/authelia
+    restart: unless-stopped
+    networks:
+      net:
+        aliases: []
+    expose:
+      - 9091
+    volumes:
+      - ${PWD}/data/authelia/config:/config
+    environment:
+      TZ: 'Pacific/Auckland'
+    container_name: whoami
+    image: docker.io/traefik/whoami
+    restart: unless-stopped
+    networks:
+      net:
+        aliases: []
+    expose:
+      - 80
+    environment:
+      TZ: 'Pacific/Auckland'
+...
